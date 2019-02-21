@@ -4,7 +4,8 @@ const images = {
 	iconPrevious: require('../assets/img/left-arrow.png'),
 	iconNext: require('../assets/img/right-arrow.png'),
 	skipForward: require('../assets/img/skip-forward.png'),
-	skipBackward: require('../assets/img/skip-backward.png')
+	skipBackward: require('../assets/img/skip-backward.png'),
+	logoText: require('../assets/img/text.png')
 };
 
 export default images;

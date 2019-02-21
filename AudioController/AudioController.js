@@ -23,6 +23,8 @@ class AudioController {
 		//Indice do áudio atual
 		this.currentIndex = 0;
 
+		this.myStatus = 'PAUSED';
+
 		//Callbacks
 		this.currentAudioListener = () => null;
 		this.currentTimeListener = () => null;
@@ -74,6 +76,7 @@ class AudioController {
 	}
 
 	onStatusChanged(status) {
+		this.myStatus = status;
 		if (status === 'PAUSED' || status === 'PLAYING') {
 			//Atualiza a duração do áudio streaming após mudança de estado
 			this.getDuration(seconds => {
@@ -263,6 +266,14 @@ class AudioController {
 				if (this.type !== 'streaming') this.onChangeStatus(this.status.LOADED);
 			} else return null;
 		});
+	}
+
+	getCurrentIndex() {
+		return this.currentIndex;
+	}
+
+	getCurrentstatus() {
+		return this.myStatus;
 	}
 
 	//------------ Callbacks ------------//	

@@ -15,7 +15,7 @@ import images from '../config/images';
 import colors from '../config/colors';
 import AudioController from '../AudioController';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 class AudioControls extends Component {
     static defaultProps = {
@@ -73,8 +73,10 @@ class AudioControls extends Component {
     }
 
     componentWillMount() {
-        const { playlist, initialTrack } = this.props;
-        AudioController.init(playlist, initialTrack, this.onChangeStatus, this.updateCurrentTime);
+        const { playlist, initialTrack, currentStatus } = this.props;
+        // if ( currentStatus !== 'PLAYING' ) {
+            AudioController.init(playlist, initialTrack, this.onChangeStatus, this.updateCurrentTime);
+        // }
     }
 
     onChangeStatus = (status) => {
@@ -208,6 +210,12 @@ class AudioControls extends Component {
         );
     }
 
+    converToPersian(str) {
+        let number = str.toString();
+        number = String(number).replace(/\d/g, digit => ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'][digit]);
+        return number;
+    }
+
     renderSkipforwardIcon() {
         if (!this.props.hasButtonSkipSeconds) return;
         return (
@@ -227,49 +235,90 @@ class AudioControls extends Component {
     render() {
         const { currentTime, duration, currentAudio } = this.state;
         return (
-            <View style={styles.container}>
-                <Image
-                    source={currentAudio.thumbnailUri ? { uri: currentAudio.thumbnailUri } : currentAudio.thumbnailLocal}
-                    style={this.props.thumbnailSize}
-                />
-                <View style={styles.detailContainer}>
-                    <Text style={this.props.titleStyle}>{currentAudio.title}</Text>
-                    <Text style={this.props.authorStyle}>{currentAudio.author}</Text>
-                </View>
-                <View style={styles.playbackContainer}>
-                    <Text numberOfLines={1} style={this.props.sliderTimeStyle}>
-                        {currentTime ? moment(currentTime * 1000).format('mm:ss') : '00:00'}
-                    </Text>
-                    <Slider
-                        value={currentTime}
-                        maximumValue={duration}
-
-                        style={styles.playbackBar}
-
-                        minimumTrackTintColor={this.props.sliderMinimumTrackTintColor ||
-                            this.props.activeColor}
-                        maximumTrackTintColor={this.props.sliderMaximumTrackTintColor ||
-                            this.props.inactiveColor}
-                        thumbTintColor={this.props.sliderThumbTintColor || this.props.activeColor}
-
-                        onSlidingComplete={seconds => {
-                            AudioController.seek(seconds);
-                            if (seconds < duration) AudioController.play();
-                        }}
-
-                        onValueChange={() => AudioController.clearCurrentTimeListener()}
+            <View style={[styles.container]}>
+                <View style={{ flex: 2.4 }}>
+                    <Image
+                        source={currentAudio.thumbnailUri ? { uri: currentAudio.thumbnailUri } : currentAudio.thumbnailLocal}
+                        style={styles.thumbnailSize}
+                        blurRadius={2}
+                        // style={this.props.thumbnailSize}
                     />
-                    <Text numberOfLines={1} style={this.props.sliderTimeStyle}>
-                        {duration ? moment(duration * 1000).format('mm:ss') : '00:00'}
-                    </Text>
+                    <View style={styles.detailContainer}>
+                        <Text style={this.props.nameStyle}>{currentAudio.name}</Text>
+                        <Text style={this.props.titleStyle}>{currentAudio.title}</Text>
+                        <Text style={this.props.authorStyle}>{currentAudio.author}</Text>
+                        <Text style={this.props.authorStyle}>({this.converToPersian(this.props.initialTrack + 1)}/{this.converToPersian(this.props.playlist.length)})</Text>
+                    </View>
                 </View>
-                <View style={styles.buttonsContainer}>
-                    {this.renderSkipbackwardIcon()}
-                    {this.renderPreviousIcon()}
-                    {this.renderPlayerIcon()}
-                    {this.renderNextIcon()}
-                    {this.renderSkipforwardIcon()}
+                
+                <View style={[styles.bot, { flex: 1 }]}>
+                    <View style={{ flexDirection: 'row', width: width, position: 'absolute', top: -30 }}>
+                        <View style={[styles.timeStyle, { alignItems: 'flex-start' }]}>
+                            <Text numberOfLines={1} style={this.props.sliderTimeStyle}>
+                                {this.converToPersian(currentTime ? moment.utc(currentTime * 1000).format('mm:ss') : '00:00')}
+                            </Text>
+                        </View>
+                        <View style={[styles.timeStyle, { alignItems: 'flex-end' }]}>
+                            <Text numberOfLines={1} style={this.props.sliderTimeStyle}>
+                                {this.converToPersian(duration ? moment.utc(duration * 1000).format('mm:ss') : '00:00')}
+                            </Text>
+                        </View>
+                        
+                    </View>
+                    <View style={styles.playbackContainer}>
+                        
+                        <Slider
+                            value={currentTime}
+                            maximumValue={duration}
+
+                            style={styles.playbackBar}
+
+                            minimumTrackTintColor={"#2ecc71"}
+                            maximumTrackTintColor={"#fff"}
+                            thumbTintColor={"#2ecc71"}
+                            
+                            // minimumTrackTintColor={this.props.sliderMinimumTrackTintColor ||
+                            //     this.props.activeColor}
+                            // maximumTrackTintColor={this.props.sliderMaximumTrackTintColor ||
+                            //     this.props.inactiveColor}
+                            // thumbTintColor={this.props.sliderThumbTintColor || this.props.activeColor}
+
+                            onSlidingComplete={seconds => {
+                                AudioController.seek(seconds);
+                                if (seconds < duration) AudioController.play();
+                            }}
+
+                            onValueChange={() => AudioController.clearCurrentTimeListener()}
+                        />
+                        
+                    </View>
+                    
+                    <View style={styles.buttonsContainer}>
+                        <View style={styles.subBtn}>
+                            {this.renderSkipbackwardIcon()}
+                        </View>
+                        <View style={styles.subBtn}>
+                            {this.renderPreviousIcon()}
+                        </View>
+                        <View style={styles.subBtn}>
+                            {this.renderPlayerIcon()}
+                        </View>
+                        <View style={styles.subBtn}>
+                            {this.renderNextIcon()}
+                        </View>
+                        <View style={styles.subBtn}>
+                            {this.renderSkipforwardIcon()}
+                        </View>
+                    </View>
+
+                    <View style={{ position: 'absolute', bottom: 20 }}>
+                        <Image
+                            source={images.logoText}
+                            style={{ width: width / 4, height: 30, resizeMode: 'contain' }}
+                        />
+                    </View>
                 </View>
+                
             </View>
         );
     }
@@ -282,26 +331,53 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
+    thumbnailSize: {
+        width: width,
+        height: '100%',
+        resizeMode: 'cover'
+    },
     detailContainer: {
         flexDirection: 'column',
-        alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 15,
-        marginVertical: 10
+        textAlign: 'right',
+        paddingHorizontal: 20,
+        position: 'absolute',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        width: width,
+        height: '100%',
+    },
+    bot: {
+        backgroundColor: '#04243d',
+        width: width,
+        flexDirection: 'column',
+        // justifyContent: 'center',
+        alignItems: 'center'
+    },
+    timeStyle: {
+        flex: 1,
+        paddingHorizontal: 10
     },
     playbackContainer: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        position: 'absolute',
+        top: -8,
+        
     },
     buttonsContainer: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 30
+    },
+    subBtn: {
+        marginHorizontal: 10
     },
     playbackBar: {
-        width: '70%'
+        width: '100%',
+        transform: [{ scaleX: 1.08 }, { scaleY: 1.1 }]
     },
     playButton: {
         width: 80,
-        height: 80
+        height: 80,
     },
     controlButton: {
         width: 20,
