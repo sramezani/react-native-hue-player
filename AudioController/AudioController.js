@@ -348,8 +348,10 @@ class AudioController {
 	//------------Alterar Estados do Music Control------------//
 
 	musicControlsEnableControls() {
-		MusicControl.enableControl('skipBackward', true, { interval: 30 });
-		MusicControl.enableControl('skipForward', true, { interval: 30 });
+		// MusicControl.enableControl('skipBackward', true, { interval: 30 });
+		// MusicControl.enableControl('skipForward', true, { interval: 30 });
+		MusicControl.enableControl('previousTrack', true);
+		MusicControl.enableControl('nextTrack', true);
 		MusicControl.enableControl('play', true);
 		MusicControl.enableControl('pause', true);
 	}
@@ -415,6 +417,12 @@ class AudioController {
 		MusicControl.on('play', () => {
 			this.play();
 			this.musicControlPlay();
+		});
+		MusicControl.on('previousTrack', () => {
+			this.playPrevious();
+		});
+		MusicControl.on('nextTrack', () => {
+			this.playNext();
 		});
 		MusicControl.on('skipForward', () => {
 			this.skip(30);
